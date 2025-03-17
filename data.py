@@ -7,7 +7,7 @@ nltk.download('reuters', quiet=True)
 nltk.download('stopwords', quiet=True)
 
 # Load words from the first Reuters file
-WORD_LEN = 1000
+WORD_LEN = 10000
 words = [word.lower() for word in reuters.words(reuters.fileids())[:WORD_LEN]]
 
 # filter
