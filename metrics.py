@@ -1,31 +1,48 @@
 import pandas as pd
 from collections import Counter
-from data import text_df
+from data import text_df, WORD_LEN
 
-records = []
-words = text_df['WORD'].tolist()
+all_words = ["SKIP"] * WORD_LEN 
+for _, row in text_df.iterrows():
+    word = row['WORD']
+    for pos in row['POSITIONS']:
+        all_words[pos] = word
+
 window_size = 100
+results = []
 
+for i in range(len(all_words) - window_size - 1):
+    window = all_words[i:i+window_size]
+    next_word = all_words[i+window_size]
     
-for start_idx in range(len(words) - window_size):
-    end_idx = start_idx + window_size - 1  
+    # Skip windows with too many placeholder words or if next word is a placeholder
+    if window.count("SKIP") > window_size/2 or next_word == "SKIP":
+        continue
+        
+    window_words = [w for w in window if w != "SKIP"] # excluding SKIP placeholders
+    word_counts = Counter(window_words)
     
-    window = words[start_idx : start_idx + window_size]
-    next_word = words[start_idx + window_size]
-    
-    freq_counter = Counter(window)
-    
-    for w, freq in freq_counter.items():
-        next_word_flag = 1 if (w == next_word) else 0
-        records.append({
-            'Window_Start': start_idx,
-            'Window_End': end_idx,
-            'Word': w,
-            'Frequency': freq,
-            'Next_Word': next_word,
-            'Next_Word_Flag': next_word_flag
+    for word, freq in word_counts.items():
+        is_recalled = 1 if word == next_word else 0
+        results.append({
+            'window_start': i,
+            'window_end': i+window_size-1,
+            'word': word,
+            'frequency': freq,
+            'is_recalled': is_recalled
         })
     
-df = pd.DataFrame.from_records(records)
+recall_df = pd.DataFrame(results)
 
-print(df)
+word_stats = recall_df.groupby('word')['is_recalled'].agg(
+    recall_probability=('mean'),
+    count=('count'), #number of windown with the word
+    recalls=('sum') #number of times the word was the next word
+).reset_index().sort_values('recall_probability', ascending=False)
+
+#avg frequency over the windows
+avg_freq = recall_df.groupby('word')['frequency'].mean().reset_index()
+word_stats = word_stats.merge(avg_freq, on='word')
+
+print(recall_df)
+print(word_stats)
