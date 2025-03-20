@@ -7,7 +7,7 @@ nltk.download('reuters', quiet=True)
 nltk.download('stopwords', quiet=True)
 
 # Load words from the first Reuters file
-WORD_LEN = 10000
+WORD_LEN = 20000
 words = [word.lower() for word in reuters.words(reuters.fileids())[:WORD_LEN]]
 
 # filter
@@ -33,4 +33,3 @@ for word, positions in words_positions.items():
 text_df = pd.DataFrame(text_data).sort_values(by='FREQUENCY', ascending=False)
 
 # print(text_df)
-# text_df.to_csv('text_data.csv', index=False)
