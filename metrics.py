@@ -37,8 +37,8 @@ recall_df = pd.DataFrame(results)
 #group by word
 word_stats = recall_df.groupby('word')['is_recalled'].agg(
     recall_probability=('mean'),
-    count=('count'), #number of windown with the word
-    recalls=('sum') #number of times the word was the next word
+    count=('count'), 
+    recalls=('sum') 
 ).reset_index().sort_values('recall_probability', ascending=False)
 #avg frequency over the windows
 avg_freq = recall_df.groupby('word')['frequency'].mean().reset_index()
@@ -48,9 +48,10 @@ word_stats = word_stats.rename(columns={'frequency': 'avg_frequency'})
 #group by frequency
 freq_stats = recall_df.groupby('frequency')['is_recalled'].agg(
     recall_probability=('mean'),
-    count=('count')
+    count=('count'), 
+    recalls=('sum') 
 ).reset_index().sort_values('recall_probability', ascending=False)
 
-# print(recall_df)
+print(recall_df)
 print(word_stats)
-print(freq_stats)
+print(freq_stats.sort_values('frequency', ascending=False))
