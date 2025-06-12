@@ -1,10 +1,9 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-# from metrics import word_stats, freq_stats
 from scipy.stats import linregress
 
-def plot_stats(word_stats):
+def plot_stats(word_stats, freq_stats):
     _, axes = plt.subplots(2, 3, figsize=(18, 8))
 
     # --- Word Frequency vs Recall Probability ---
@@ -12,12 +11,14 @@ def plot_stats(word_stats):
         x='avg_frequency', 
         y='need_odds', 
         data=word_stats,
-        ax=axes[0, 0]
+        ax=axes[0, 0],
+        alpha=0.5,
+        linewidth=0
     )
 
-    axes[0, 0].set_title(f'Word Frequency vs Recall Probability(group by word)')
-    axes[0, 0].set_xlabel('Average Frequency')
-    axes[0, 0].set_ylabel('Recall Probability')
+    axes[0, 0].set_title(f'Need Odds vs Frequency (by Word)')
+    axes[0, 0].set_xlabel('Avg Frequency')
+    axes[0, 0].set_ylabel('Need Odds')
     axes[0, 0].grid(True)
 
     # --- Log Transformation for Word Stats ---
@@ -29,11 +30,13 @@ def plot_stats(word_stats):
         x='log_avg_frequency', 
         y='log_need_odds', 
         data=word_stats_log,
-        ax=axes[0, 1]
+        ax=axes[0, 1],
+        alpha=0.5,
+        linewidth=0
     )
-    axes[0, 1].set_title(f'Log Transformation: Avg Frequency vs Recall Probability')
+    axes[0, 1].set_title(f'Log Transformation: Need Odds vs Avg Frequency')
     axes[0, 1].set_xlabel('Log Avg Frequency')
-    axes[0, 1].set_ylabel('Log Recall Probability')
+    axes[0, 1].set_ylabel('Log Need Odds')
     axes[0, 1].grid(True)
 
     # --- Linear Regression on Log-Transformed Data ---
@@ -41,101 +44,83 @@ def plot_stats(word_stats):
         word_stats_log['log_avg_frequency'], 
         word_stats_log['log_need_odds']
     )
-    word_stats_log['predicted'] = slope_fw * word_stats_log['log_avg_frequency'] + intercept_fw
-    word_stats_log['residual'] = np.abs(word_stats_log['log_need_odds'] - word_stats_log['predicted'])
-    threshold = 0.2
-    close_points = word_stats_log[word_stats_log['residual'] < threshold].copy()
-    close_points = close_points.sort_values('log_avg_frequency')
-
-
-    axes[0, 2].plot(close_points['log_avg_frequency'], close_points['log_need_odds'], color='blue', linestyle='--')
     x_vals = word_stats_log['log_avg_frequency']
     axes[0, 2].plot(x_vals, slope_fw * x_vals + intercept_fw, color='red', linestyle='-', label='Regression Line')
 
-    sorted_log_data = word_stats_log.sort_values('log_avg_frequency')
     sns.scatterplot(
         x='log_avg_frequency', 
         y='log_need_odds',
-        data=sorted_log_data,
+        data=word_stats_log.sort_values('log_avg_frequency'),
         ax=axes[0, 2],
         alpha=0.5,
+        linewidth=0,
         label=f'y = {slope_fw:.2f}x + {intercept_fw:.2f}\nR² = {r_value_fw**2:.3f}'
     )
-    axes[0, 2].set_title('Log-Log: Avg Frequency vs Recall Probability')
+    axes[0, 2].set_title('Log Need Odds vs Log Avg Frequency (Regression Line)')
     axes[0, 2].set_xlabel('Log Avg Frequency')
-    axes[0, 2].set_ylabel('Log Recall Probability')
+    axes[0, 2].set_ylabel('Log Need Odds')
     axes[0, 2].grid(True)
 
 
+    # --- Frequency Stats Analysis ---
+    sns.scatterplot(
+        x='frequency', 
+        y='need_odds', 
+        data=freq_stats, 
+        ax=axes[1, 0]
+    )
+    axes[1, 0].set_title('Need odds vs Frequency (by frequency)')
+    axes[1, 0].set_xlabel('Frequency')
+    axes[1, 0].set_ylabel('Need Odds')
+    axes[1, 0].grid(True)
 
+    # --- Log Transformation for Frequency Stats ---
+    freq_stats_log = freq_stats[freq_stats['frequency'] > 0].copy()        
+    freq_stats_log['log_frequency'] = np.log(freq_stats_log['frequency'])
+    freq_stats_log['log_need_odds'] = np.log(freq_stats_log['need_odds'])
 
-    # # --- Frequency Stats Analysis ---
-    # sns.scatterplot(
-    #     x='frequency', 
-    #     y='need_odds', 
-    #     data=freq_stats, 
-    #     ax=axes[1, 0]
-    # )
-    # axes[1, 0].set_title('Word Frequency vs Recall Probability (group by frequency)')
-    # axes[1, 0].set_xlabel('Frequency')
-    # axes[1, 0].set_ylabel('Recall Probability')
-    # axes[1, 0].grid(True)
+    sns.scatterplot(
+        x='log_frequency', 
+        y='log_need_odds', 
+        data=freq_stats_log, 
+        ax=axes[1, 1]
+    )
+    axes[1, 1].set_title('Log Transformation: Need Odds vs Frequency')
+    axes[1, 1].set_xlabel('Log Frequency')
+    axes[1, 1].set_ylabel('Log Need Odds')
+    axes[1, 1].grid(True)
 
-    # # --- Log Transformation for Frequency Stats ---
-    # freq_stats_log = freq_stats[freq_stats['frequency'] > 0].copy()        
-    # freq_stats_log['log_frequency'] = np.log(freq_stats_log['frequency'])
-    # freq_stats_log['log_need_odds'] = np.log(freq_stats_log['need_odds'])
+    # --- Linear Regression for Log-Transformed Frequency Stats ---
+    log_y_data = freq_stats_log[freq_stats_log['need_odds'] > 0].copy()
+    log_y_data['log_need_odds'] = np.log(log_y_data['need_odds'])
 
-    # sns.scatterplot(
-    #     x='log_frequency', 
-    #     y='log_need_odds', 
-    #     data=freq_stats_log, 
-    #     ax=axes[1, 1]
-    # )
-    # axes[1, 1].set_title('Log Transformation: Frequency vs Recall Probability')
-    # axes[1, 1].set_xlabel('Log Frequency')
-    # axes[1, 1].set_ylabel('Log Recall Probability')
-    # axes[1, 1].grid(True)
+    slope_fs, intercept_fs, r_value_fs, _, _ = linregress(
+        log_y_data['log_frequency'], 
+        log_y_data['log_need_odds']
+    )
 
-    # # --- Linear Regression for Log-Transformed Frequency Stats ---
-    # log_y_data = freq_stats_log[freq_stats_log['need_odds'] > 0].copy()
-    # log_y_data['log_need_odds'] = np.log(log_y_data['need_odds'])
+    sorted_log_freq_data = log_y_data.sort_values('log_frequency')
+    sns.scatterplot(
+        x='log_frequency', 
+        y='log_need_odds',
+        data=sorted_log_freq_data,
+        ax=axes[1, 2]
+    )
 
-    # slope_fs, intercept_fs, r_value_fs, _, _ = linregress(
-    #     log_y_data['log_frequency'], 
-    #     log_y_data['log_need_odds']
-    # )
-    # freq_stats_log['predicted'] = slope_fs * freq_stats_log['log_frequency'] + intercept_fs
-    # freq_stats_log['residual'] = np.abs(freq_stats_log['log_need_odds'] - freq_stats_log['predicted'])
-    # threshold = 0.2
-    # freq_close_points = freq_stats_log[freq_stats_log['residual'] < threshold].copy()
-    # freq_close_points = freq_close_points.sort_values('log_frequency')
+    x_values = sorted_log_freq_data['log_frequency']
+    axes[1, 2].plot(
+        x_values, 
+        slope_fs * x_values + intercept_fs, 
+        color='red', 
+        linestyle='-', 
+        label=f'y = {slope_fs:.2f}x + {intercept_fs:.2f}\nR² = {r_value_fs**2:.3f}'
+    )
 
-    # sorted_log_freq_data = log_y_data.sort_values('log_frequency')
-    # sns.scatterplot(
-    #     x='log_frequency', 
-    #     y='log_need_odds',
-    #     data=sorted_log_freq_data,
-    #     ax=axes[1, 2],
-    #     alpha=0.5
-    # )
-
-    # x_values = sorted_log_freq_data['log_frequency']
-    # reg_line_fs = slope_fs * x_values + intercept_fs
-    # axes[1, 2].plot(
-    #     x_values, 
-    #     reg_line_fs, 
-    #     color='red', 
-    #     linestyle='-', 
-    #     label=f'y = {slope_fs:.2f}x + {intercept_fs:.2f}\nR² = {r_value_fs**2:.3f}'
-    # )
-    # axes[1, 2].plot(freq_close_points['log_frequency'], freq_close_points['log_need_odds'], color='blue', linestyle='--')
-
-    # axes[1, 2].legend()
-    # axes[1, 2].set_title('Log-Log: Frequency vs Recall Probability')
-    # axes[1, 2].set_xlabel('Log Frequency')
-    # axes[1, 2].set_ylabel('Log Recall Probability')
-    # axes[1, 2].grid(True)
+    axes[1, 2].legend()
+    axes[1, 2].set_title('Log Need Odds vs Log Frequency (Regression Line)')
+    axes[1, 2].set_xlabel('Log Frequency')
+    axes[1, 2].set_ylabel('Log Need Odds')
+    axes[1, 2].grid(True)
 
     plt.tight_layout()
     plt.show()
