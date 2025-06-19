@@ -24,3 +24,14 @@ The program generates a series of plots showing:
 4. Frequency-based statistics
 5. Log-transformed frequency analysis
 6. Regression analysis of log-transformed data
+
+
+## Hypotheses
+1. Frequency - Valence 
+- Words that occur more frequently will have a higher(positive) valence
+2. Frequency - Arousal
+- More frequent words would have lower arousal
+3. Valence - Arousal
+- Words with extreme valence (very positive or very negative) would also have higher arousal 
+4. Frequency - Dominance
+- 

@@ -34,7 +34,7 @@ def plot_stats(word_stats, freq_stats):
         alpha=0.5,
         linewidth=0
     )
-    axes[0, 1].set_title(f'Log Transformation: Need Odds vs Avg Frequency')
+    axes[0, 1].set_title(f'Log Transformation: Need Odds vs Frequency')
     axes[0, 1].set_xlabel('Log Avg Frequency')
     axes[0, 1].set_ylabel('Log Need Odds')
     axes[0, 1].grid(True)
@@ -44,19 +44,27 @@ def plot_stats(word_stats, freq_stats):
         word_stats_log['log_avg_frequency'], 
         word_stats_log['log_need_odds']
     )
-    x_vals = word_stats_log['log_avg_frequency']
-    axes[0, 2].plot(x_vals, slope_fw * x_vals + intercept_fw, color='red', linestyle='-', label='Regression Line')
-
+    
     sns.scatterplot(
         x='log_avg_frequency', 
         y='log_need_odds',
         data=word_stats_log.sort_values('log_avg_frequency'),
         ax=axes[0, 2],
         alpha=0.5,
-        linewidth=0,
+        linewidth=0
+    )
+
+    x_vals = word_stats_log['log_avg_frequency']
+    axes[0, 2].plot(
+        x_vals, 
+        slope_fw * x_vals + intercept_fw, 
+        color='red', 
+        linestyle='-', 
         label=f'y = {slope_fw:.2f}x + {intercept_fw:.2f}\nR² = {r_value_fw**2:.3f}'
     )
-    axes[0, 2].set_title('Log Need Odds vs Log Avg Frequency (Regression Line)')
+    
+    axes[0, 2].legend()
+    axes[0, 2].set_title('Log Need Odds vs Log Frequency (Regression Line)')
     axes[0, 2].set_xlabel('Log Avg Frequency')
     axes[0, 2].set_ylabel('Log Need Odds')
     axes[0, 2].grid(True)

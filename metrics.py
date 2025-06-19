@@ -46,7 +46,6 @@ avg_freq = avg_freq.rename(columns={'frequency': 'avg_frequency'})
 word_stats = word_stats.merge(avg_freq, on='word')
 word_stats['need_odds'] = word_stats['recall_probability'].transform(lambda x: x/(1-x))
 
-
 freq_stats = recall_df.groupby('frequency').agg(
     total=('is_recalled', 'count'),
     recalls=('is_recalled', 'sum')
@@ -55,4 +54,4 @@ freq_stats['recall_probability'] = freq_stats['recalls'] / freq_stats['total']
 freq_stats['need_odds'] = freq_stats['recall_probability'].transform(lambda x: x/(1-x))
 
 
-plot_stats(word_stats, freq_stats)
+# plot_stats(word_stats, freq_stats)
