@@ -34,6 +34,9 @@ for i in range(len(all_words) - window_size - 1):
             'is_recalled': is_recalled
         })
 recall_df = pd.DataFrame(results)
+# recall_df['word'] = recall_df['word'].replace('mln', 'million')
+# recall_df['word'] = recall_df['word'].replace('pct', 'percent')
+# recall_df['word'] = recall_df['word'].replace('dlrs', 'dollars')
 
 #group by word
 word_stats = recall_df.groupby('word')['is_recalled'].agg(
@@ -48,10 +51,15 @@ word_stats['need_odds'] = word_stats['recall_probability'].transform(lambda x: x
 
 freq_stats = recall_df.groupby('frequency').agg(
     total=('is_recalled', 'count'),
-    recalls=('is_recalled', 'sum')
+    recalls=('is_recalled', 'sum'),
 ).reset_index()
 freq_stats['recall_probability'] = freq_stats['recalls'] / freq_stats['total']
 freq_stats['need_odds'] = freq_stats['recall_probability'].transform(lambda x: x/(1-x))
+freq_stats['unique_words'] = recall_df.groupby('frequency')['word'].unique().reset_index(drop=True)
+# freq_stats = freq_stats[freq_stats['frequency'] <= 13]
 
+print(freq_stats)
+# freq_range_df = recall_df[(recall_df['frequency'] >= 11) & (recall_df['frequency'] <= 22)]
+# print(freq_range_df['word'].unique())
 
 # plot_stats(word_stats, freq_stats)

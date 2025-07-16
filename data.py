@@ -10,6 +10,15 @@ nltk.download('stopwords', quiet=True)
 WORD_LEN = 20000
 words = [word.lower() for word in reuters.words(reuters.fileids())[:WORD_LEN]]
 
+ACRONYM_MAP = {
+    "pct": "percent",
+    "mln": "million",
+    "dlrs": "dollars"
+}
+
+# Replace acronyms with full forms
+words = [ACRONYM_MAP.get(word, word) for word in words]
+
 # filter
 stop_words = set(stopwords.words('english'))
 filtered_words = []

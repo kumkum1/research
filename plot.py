@@ -87,6 +87,9 @@ def plot_stats(word_stats, freq_stats):
     freq_stats_log['log_frequency'] = np.log(freq_stats_log['frequency'])
     freq_stats_log['log_need_odds'] = np.log(freq_stats_log['need_odds'])
 
+    print(freq_stats)
+    print(freq_stats_log)
+
     sns.scatterplot(
         x='log_frequency', 
         y='log_need_odds', 

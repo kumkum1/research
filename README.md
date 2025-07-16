@@ -33,5 +33,4 @@ The program generates a series of plots showing:
 - More frequent words would have lower arousal
 3. Valence - Arousal
 - Words with extreme valence (very positive or very negative) would also have higher arousal 
-4. Frequency - Dominance
 - 

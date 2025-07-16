@@ -12,3 +12,5 @@ merged_df.to_csv('combined_with_emotion.csv', index=False)
 # data with only complete rows for emotion analysis
 cleaned_df = merged_df.dropna(subset=['VALENCE', 'AROUSAL', 'DOMINANCE'])
 cleaned_df.to_csv("clean.csv", index=False)
+
+# print('dollars' in emot_df['WORD'].values)
