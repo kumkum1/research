@@ -1,36 +1,93 @@
-# Word Frequency and Recall Analysis
+# Word Frequency and Recall Analysis with Emotional Norms
 
-## Research Context
+This research project investigates the relationship between word frequency, emotional characteristics (valence and arousal), and memory recall probability. This research builds upon **Anderson & Schooler's (1991) need probability model**, which examines how word frequency in a context window predicts its appearance in subsequent positions. Our implementation adapts their methodology to analyze emotional dimensions alongside frequency effects.
 
-The analysis follows Anderson & Schooler's (1991) methodology for examining word usage patterns in news headlines over time. In their study, they observed that if a word (e.g., "Reagan") appears 52 times in a 100-day window, they could analyze its probability of appearing on the 101st day. 
+## Implemntation
 
-In our implementation:
-- We use a sliding window of 200 words (analogous to the 100-day window in Anderson & Schooler's news headline study)
-- We analyze how word frequency within this window predicts its appearance in the next position
-- We calculate "need odds" (recall probability) to estimate the likelihood of a word appearing based on its frequency
+#### 1. Corpus Preparation (`data.py`)
+- **Source**: Reuters corpus (first 50,000 words)
+- **Preprocessing**:
+  - Tokenization and Stopword removal 
+  - Acronym expansion 
+  - Position tracking for each word
 
-## Structure
+#### 2. Sliding Window Analysis (`metrics.py`)
+- **Window Size**: 400 words (analogous to Anderson & Schooler's 100-day window)
+- **Step Size**: 1 word (sliding window approach)
+- **Recall Calculation**: For each word in the window, determine if it appears as the next word
+- **Statistics Computed**:
+  - Recall probability: P(recall|frequency)
+  - Need odds: recall_probability / (1 - recall_probability)
+  - Frequency statistics and word-level metrics
 
-- `data.py`: Handles data loading and preprocessing from the Reuters corpus. Loads and structures the raw data into `text_df`, including word positions and metadata.
-- `metrics.py`: Implements the sliding window analysis and calculates recall probabilities
-- `plot.py`: Generates visualizations of the analysis results
+#### 3. Emotional Integration (`merge_with_emotnorm_dataset.py`)
+- **Emotional Norms**: Merges with `emot_28724.csv` containing valence and arousal ratings
+- **Data Cleaning**: Handles missing emotional data
+- **Feature Engineering**: Creates log-transformed frequency and need odds
 
-## Output
+## Statistical Analysis
 
-The program generates a series of plots showing:
-1. Need odds vs. frequency (by word)
-2. Log-transformed analysis of need odds vs. frequency
-3. Linear regression analysis
-4. Frequency-based statistics
-5. Log-transformed frequency analysis
-6. Regression analysis of log-transformed data
+### Regression Models (`regression.py`)
+
+1. **Model 1**: Main effects only
+   ```
+   log_need ~ log_freq + valence_dm + arousal_dm
+   ```
+
+2. **Model 2**: Frequency × Valence interaction
+   ```
+   log_need ~ log_freq * valence_dm
+   ```
+
+3. **Model 3**: Frequency × Arousal interaction
+   ```
+   log_need ~ log_freq * arousal_dm
+   ```
+
+4. **Model 4**: Three-way interaction
+   ```
+   log_need ~ log_freq * valence_dm * arousal_dm
+   ```
+
+5. **Model 5**: Combined interaction effects
+   ```
+   log_need ~ log_freq * valence_dm + log_freq * arousal_dm
+   ```
+
+6. **Model 6**: Categorical analysis
+   ```
+   log_need ~ log_freq * C(valence_group) * C(arousal_group)
+   ```
+
+## Visualizations 
+
+1. **Basic Analysis Plots** (`basic_analysis_plots.png`)
+   - Need odds vs. frequency (by word and frequency)
+   - Log-transformed analyses
+
+2. **Emotional Analysis** (`analysis_with_emotional_norm.png`)
+   - Frequency vs. recall with arousal (size/opacity) and valence (color)
+   - Separate analyses for word-level and frequency-level data
+
+3. **Split Analysis** (`word_freq_split_valence_arousal.png`)
+   - Individual plots for valence and arousal effects
+   - Color-coded emotional dimensions
+
+4. **3×3 Grid Analysis** (`split_valence_arousal_9plots.png`)
+   - Detailed breakdown by valence and arousal groups
+   - Individual regression lines for each combination
+
+5. **Combined Summary** (`combined_3split_summary_plot.png`)
+   - Comprehensive view of all emotional dimensions
+   - Color-coded valence groups with size-coded arousal
+
+## Results
+
+## References
+
+- Anderson, J. R., & Schooler, L. J. (1991). Reflections of the environment in memory. *Psychological Science*, 2(6), 396-408.
+- Warriner, A. B., Kuperman, V., & Brysbaert, M. (2013). Norms of valence, arousal, and dominance for 13,915 English lemmas. *Behavior Research Methods*, 45(4), 1191-1207.
 
 
-## Hypotheses
-1. Frequency - Valence 
-- Words that occur more frequently will have a higher(positive) valence
-2. Frequency - Arousal
-- More frequent words would have lower arousal
-3. Valence - Arousal
-- Words with extreme valence (very positive or very negative) would also have higher arousal 
-- 
+
+

@@ -55,4 +55,9 @@ freq_stats['need_odds'] = freq_stats['recall_probability'].transform(lambda x: x
 freq_stats['unique_words'] = recall_df.groupby('frequency')['word'].unique().reset_index(drop=True)
 
 # print(freq_stats)
-# plot_stats(word_stats, freq_stats)
+plot_stats(word_stats, freq_stats)
+
+# Save the results to CSV files
+word_stats.to_csv('data/processed/word_stats.csv', index=False)
+freq_stats.to_csv('data/processed/freq_stats.csv', index=False)
+recall_df.to_csv('data/processed/recall_df.csv', index=False)

@@ -42,4 +42,4 @@ for word, positions in words_positions.items():
         'positions': positions
     })
 text_df = pd.DataFrame(text_data).sort_values(by='frequency', ascending=False)
-# text_df.to_csv('text_data.csv', index=False)
+text_df.to_csv('data/processed/text_data.csv', index=False)
