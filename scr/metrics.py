@@ -3,13 +3,13 @@ from collections import Counter
 from data import text_df, WORD_LEN
 from plot import plot_stats
 
-all_words = ["SKIP"] * WORD_LEN 
+all_words = ["skip"] * WORD_LEN 
 for _, row in text_df.iterrows():
-    word = row['WORD']
-    for pos in row['POSITIONS']:
+    word = row['word']
+    for pos in row['positions']:
         all_words[pos] = word
 
-window_size = 200 #200 seems to work better than a 100 and 300 window size
+window_size = 400 
 results = []
 
 for i in range(len(all_words) - window_size - 1):
@@ -17,10 +17,10 @@ for i in range(len(all_words) - window_size - 1):
     next_word = all_words[i+window_size]
     
     # Skip windows with too many placeholder words or if next word is a placeholder
-    if window.count("SKIP") > window_size/2 or next_word == "SKIP":
+    if window.count("skip") > window_size/2 or next_word == "skip":
         continue
         
-    window_words = [w for w in window if w != "SKIP"] # excluding SKIP placeholders
+    window_words = [w for w in window if w != "skip"] # excluding SKIP placeholders
     
     word_counts = Counter(window_words)
          
@@ -34,9 +34,6 @@ for i in range(len(all_words) - window_size - 1):
             'is_recalled': is_recalled
         })
 recall_df = pd.DataFrame(results)
-# recall_df['word'] = recall_df['word'].replace('mln', 'million')
-# recall_df['word'] = recall_df['word'].replace('pct', 'percent')
-# recall_df['word'] = recall_df['word'].replace('dlrs', 'dollars')
 
 #group by word
 word_stats = recall_df.groupby('word')['is_recalled'].agg(
@@ -56,10 +53,6 @@ freq_stats = recall_df.groupby('frequency').agg(
 freq_stats['recall_probability'] = freq_stats['recalls'] / freq_stats['total']
 freq_stats['need_odds'] = freq_stats['recall_probability'].transform(lambda x: x/(1-x))
 freq_stats['unique_words'] = recall_df.groupby('frequency')['word'].unique().reset_index(drop=True)
-# freq_stats = freq_stats[freq_stats['frequency'] <= 13]
 
-print(freq_stats)
-# freq_range_df = recall_df[(recall_df['frequency'] >= 11) & (recall_df['frequency'] <= 22)]
-# print(freq_range_df['word'].unique())
-
+# print(freq_stats)
 # plot_stats(word_stats, freq_stats)

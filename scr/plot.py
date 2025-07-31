@@ -87,8 +87,8 @@ def plot_stats(word_stats, freq_stats):
     freq_stats_log['log_frequency'] = np.log(freq_stats_log['frequency'])
     freq_stats_log['log_need_odds'] = np.log(freq_stats_log['need_odds'])
 
-    print(freq_stats)
-    print(freq_stats_log)
+    # print(freq_stats)
+    # print(freq_stats_log)
 
     sns.scatterplot(
         x='log_frequency', 
@@ -134,4 +134,5 @@ def plot_stats(word_stats, freq_stats):
     axes[1, 2].grid(True)
 
     plt.tight_layout()
+    # plt.savefig('../output/plots/basic_analysis_plots.png', dpi=300, bbox_inches='tight')
     plt.show()

@@ -1,78 +1,13 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from metrics import word_stats, freq_stats, recall_df         
-from combine_data import cleaned_df
+from merge_with_emotnorm_dataset import word_stats_emot, freq_stats_emot, norm
 from scipy.stats import linregress
 import statsmodels.formula.api as smf
 
-
-# print(cleaned_df)
-#freq_stats -> [1893 rows x 6 columns]
-
-emot_df = pd.read_csv('emot_28724.csv')
-emot_df.rename(columns=lambda x: x.lower().strip(), inplace=True)
-emot_df = emot_df[['word', 'valence', 'arousal']]
-
-merged_df = pd.merge(word_stats, emot_df, on='word', how='left')
-merged_df.to_csv('combined_with_emotion.csv', index=False)
-
-# data with only complete rows for emotion analysis
-word_stats_emot = merged_df.dropna(subset=['valence', 'arousal'])
-print(word_stats_emot)
-
-# --------------------------------------------- ##
-
-# recall_df['word'] = recall_df['word'].replace('mln', 'million')
-# recall_df['word'] = recall_df['word'].replace('pct', 'percent')
-
-recalled_with_emotion = (
-    recall_df.merge(emot_df, on='word', how='left')
-)
-
-# print(recall_df)
-# print(recalled_with_emotion)
-
-freq_stats_emot = recalled_with_emotion.groupby('frequency').agg(
-    total=('is_recalled', 'count'),
-    recalls=('is_recalled', 'sum'),
-    mean_valence=('valence', 'mean'),
-    mean_arousal=('arousal', 'mean')
-).reset_index()
-freq_stats_emot['recall_probability'] = freq_stats_emot['recalls'] / freq_stats_emot['total']
-freq_stats_emot['need_odds'] = freq_stats_emot['recall_probability'].transform(lambda x: x/(1-x))
-freq_stats_emot.dropna(subset=['mean_valence', 'mean_arousal'], inplace=True)
-
-print(freq_stats_emot)
-# print(freq_stats)
-
-# --- Normalization Helper ---
-def norm(series):
-    return (series - series.min()) / (series.max() - series.min())
-
-# --- Word-level Plot Data ---
-word_stats_emot = word_stats_emot.copy()
-word_stats_emot = word_stats_emot[(word_stats_emot['avg_frequency'] > 0) & (word_stats_emot['need_odds'] > 0)]
-
-word_stats_emot['log_freq'] = np.log(word_stats_emot['avg_frequency'])
-word_stats_emot['log_need'] = np.log(word_stats_emot['need_odds'])
-word_stats_emot['arousal_n'] = norm(word_stats_emot['arousal'])
-
-# --- Frequency-level Plot Data ---
-freq_stats_emot = freq_stats_emot.copy()
-freq_stats_emot = freq_stats_emot[(freq_stats_emot['frequency'] > 0) & (freq_stats_emot['need_odds'] > 0)]
-
-freq_stats_emot['log_freq'] = np.log(freq_stats_emot['frequency'])
-freq_stats_emot['log_need'] = np.log(freq_stats_emot['need_odds'])
-freq_stats_emot['arousal_n'] = norm(freq_stats_emot['mean_arousal'])
-
-print(freq_stats_emot)
-# # --------------------------------------------------  PLOTS  ------------------
 fig, axes = plt.subplots(2, 1, figsize=(12, 8), sharey=True)
 
-# vmin = min(word_stats_emot['valence'].min(), freq_stats_emot['mean_valence'].min())
-# vmax = max(word_stats_emot['valence'].max(), freq_stats_emot['mean_valence'].max())
-
+# The min and max values from the paper DOI: 10.3758/s13428-012-0314-x
 vmin = 1
 vmax = 9
 
@@ -95,7 +30,6 @@ slope, intercept, r, _, _ = linregress(word_stats_emot['log_freq'], word_stats_e
 x_vals = np.sort(word_stats_emot['log_freq'])
 axes[0].plot(x_vals, slope * x_vals + intercept, color='red', linestyle='-', linewidth=1.5)
 axes[0].legend([f'y={slope:.2f}x+{intercept:.2f}\nR²={r**2:.2f}'], loc='lower right', fontsize='x-small')
-
 
 # (1,0) FREQ LEVEL
 sc2 = axes[1].scatter(
@@ -121,9 +55,6 @@ axes[1].legend([f'y={slope:.2f}x+{intercept:.2f}\nR²={r**2:.2f}'], loc='lower r
 # Add gridlines
 for ax in axes:
     ax.grid(True, which='both', linestyle='--', linewidth=0.5, alpha=0.7)
-
-# plt.tight_layout()
-# plt.show()
 
 
 # -- Valence and Arousal separated -----------------------------------------
@@ -193,31 +124,6 @@ for i, valence_label in enumerate(valence_labels):
 
         # Add regression line only if enough data
         if len(subset) >= 2 and subset['log_freq'].nunique() > 1:
-
-            # 1. Multiple regression with interaction terms (OLS)
-            model = smf.ols(
-                formula='log_need ~ log_freq * valence + log_freq * arousal',
-                data=subset
-            ).fit()
-
-            freq_range = np.linspace(subset['log_freq'].min(), subset['log_freq'].max(), 100)
-            val_mean = subset['valence'].mean()
-            aro_mean = subset['arousal'].mean()
-
-            pred_df = pd.DataFrame({
-                'log_freq': freq_range,
-                'valence': val_mean,
-                'arousal': aro_mean
-            })
-            pred_df['log_need_pred'] = model.predict(pred_df)
-
-            [line_interaction] = ax.plot(
-                freq_range, pred_df['log_need_pred'],
-                color='blue', linestyle='--', linewidth=1.5,
-                label=f'MultReg R²={model.rsquared:.2f}'
-            )
-
-            # 2. Simple linear regression
             slope, intercept, r_value, _, _ = linregress(subset['log_freq'], subset['log_need'])
 
             x_vals = np.sort(subset['log_freq'])
@@ -229,8 +135,7 @@ for i, valence_label in enumerate(valence_labels):
                 label=f'Simple y={slope:.2f}x+{intercept:.2f}\nR²={r_value**2:.2f}'
             )
 
-            # Combine both lines in legend
-            ax.legend(handles=[line_simple, line_interaction], loc='lower right', fontsize='x-small')
+            ax.legend(handles=[line_simple], loc='lower right', fontsize='x-small')
 
 fig.colorbar(sc, ax=axes, label='Valence', orientation='vertical', fraction=0.02, pad=0.04)
 
@@ -243,8 +148,8 @@ for ax in axes[:, 0]:
 ############ --------------------------------------------------------------------------------- ############
 ############ --------------------------------------------------------------------------------- ############
 
+# -- 3 split valence and arousal groups combined into a single plot -----------------------------
 
-# Create a single plot with different colors for valence and sizes for arousal
 fig, ax = plt.subplots(figsize=(12, 8))
 
 valence_colors = {'Low Valence': 'blue', 'Mid Valence': 'green', 'High Valence': 'red'}
