@@ -7,7 +7,6 @@ from scipy.stats import linregress
 word_stats_emot = pd.read_csv('data/merged/word_stats_emot.csv')
 freq_stats_emot = pd.read_csv('data/merged/freq_stats_emot.csv')
 
-
 # Regression Helper 
 def add_regression(ax, x, y, color='red', label_prefix='Simple', threshold=2):
     if len(x) >= threshold and np.unique(x).size > 1:
@@ -17,7 +16,6 @@ def add_regression(ax, x, y, color='red', label_prefix='Simple', threshold=2):
         ax.plot(x_vals, y_vals, color=color, linestyle='-', linewidth=1.5)
         ax.legend([f'{label_prefix} y={slope:.2f}x+{intercept:.2f}\nR²={r_value**2:.2f}'],
                   loc='lower right', fontsize='x-small')
-
 
 # Plot 1 
 fig, axes = plt.subplots(2, 1, figsize=(12, 8), sharey=True)
@@ -130,7 +128,6 @@ for ax in axes[:, 0]:
 plt.tight_layout()
 plt.savefig("output/plots/split_valence_arousal_9plots.png", dpi=300)
 
-
 # Plot 4
 valence_colors = dict(zip(valence_labels, ['blue', 'green', 'red']))
 arousal_sizes = dict(zip(arousal_labels, [50, 200, 500]))
@@ -162,3 +159,4 @@ ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', title='Groups')
 
 plt.tight_layout()
 plt.savefig("output/plots/combined_3split_summary_plot.png", dpi=300)
+

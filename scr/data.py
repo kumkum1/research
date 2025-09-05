@@ -7,7 +7,7 @@ nltk.download('reuters', quiet=True)
 nltk.download('stopwords', quiet=True)
 
 # Load words from the first Reuters file
-WORD_LEN = 50000
+WORD_LEN = 300000
 words = [word.lower() for word in reuters.words(reuters.fileids())[:WORD_LEN]]
 
 ACRONYM_MAP = {
@@ -27,7 +27,7 @@ filtered_words = []
 
 words_positions = defaultdict(list)
 for idx, word in enumerate(words):
-    if word.isalpha() and word not in stop_words:
+    if word.isalpha() and not word in stop_words:
         filtered_words.append(word)
         words_positions[word].append(idx)
 

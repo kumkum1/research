@@ -3,6 +3,10 @@ import seaborn as sns
 import numpy as np
 from scipy.stats import linregress
 import os
+import pandas as pd
+
+word_stats = pd.read_csv('data/processed/word_stats.csv')
+freq_stats = pd.read_csv('data/processed/freq_stats.csv')
 
 def plot_stats(word_stats, freq_stats):
     os.makedirs("output/plots", exist_ok=True)
@@ -42,6 +46,7 @@ def plot_stats(word_stats, freq_stats):
                  'Need Odds vs Frequency (by Word)', 'Avg Frequency', 'Need Odds')
 
     word_stats_log = log_transform(word_stats, 'avg_frequency', 'need_odds')
+
     plot_scatter(axes[0, 1], word_stats_log, 'log_avg_frequency', 'log_need_odds',
                  'Log-Transformed: Need Odds vs Frequency', 'Log Avg Frequency', 'Log Need Odds')
 
@@ -62,3 +67,6 @@ def plot_stats(word_stats, freq_stats):
     plt.tight_layout()
     plt.savefig('output/plots/basic_analysis_plots.png', dpi=300, bbox_inches='tight')
     plt.show()
+
+
+plot_stats(word_stats, freq_stats)
