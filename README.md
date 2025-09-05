@@ -25,6 +25,16 @@ This research project investigates the relationship between word frequency, emot
 - **Data Cleaning**: Handles missing emotional data
 - **Feature Engineering**: Creates log-transformed frequency and need odds
 
+### Run Order
+
+When executing the project, the typical order is:
+
+1. Run **`metrics.py`** to compute sliding window statistics.
+2. Run **`plot.py`** to generate the **basic analysis plots**.
+3. Run **`merge_with_emotnorm_dataset.py`** to merge frequency data with emotional norms.
+4. Run the **visualization scripts** (`visualizations.py`) to produce emotion-based plots.
+5. Finally, run **`regression.py`** to fit and evaluate regression models.
+
 ## Statistical Analysis
 
 ### Regression Models (`regression.py`)
@@ -87,6 +97,9 @@ This research project investigates the relationship between word frequency, emot
 
 - Anderson, J. R., & Schooler, L. J. (1991). Reflections of the environment in memory. *Psychological Science*, 2(6), 396-408.
 - Warriner, A. B., Kuperman, V., & Brysbaert, M. (2013). Norms of valence, arousal, and dominance for 13,915 English lemmas. *Behavior Research Methods*, 45(4), 1191-1207.
+
+
+
 
 
 
